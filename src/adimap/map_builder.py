@@ -310,9 +310,9 @@ def build_map(
     # folium.TileLayer("CartoDB dark_matter").add_to(fmap)
 
     # Basemaps (explicit tiles + proper attribution)
-    folium.TileLayer(
-        tiles="OpenStreetMap", name="OpenStreetMap", attr="© OpenStreetMap contributors"
-    ).add_to(fmap)
+    # folium.TileLayer(
+    #     tiles="OpenStreetMap", name="OpenStreetMap", attr="© OpenStreetMap contributors"
+    # ).add_to(fmap)
 
     folium.TileLayer(
         tiles="Stamen Terrain",
@@ -337,6 +337,10 @@ def build_map(
         tiles="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         name="CartoDB Dark Matter",
         attr="© OpenStreetMap contributors, © CARTO",
+    ).add_to(fmap)
+
+    folium.TileLayer(
+        tiles="OpenStreetMap", name="OpenStreetMap", attr="© OpenStreetMap contributors"
     ).add_to(fmap)
 
     fmap.get_root().html.add_child(_title_element(title))
