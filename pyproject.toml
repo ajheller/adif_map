@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adimap"
+version = "0.1.0"
+description = "Plot ADIF (amateur radio) QSOs on an interactive map, colored by band."
+readme = "README.md"
+authors = [{ name = "Your Name" }]
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+dependencies = ["folium>=0.14"]
+
+[project.scripts]
+adimap = "adimap.cli:main"
+
+[tool.ruff]
+line-length = 79
+# Pick the Python version you target; adjust if needed
+# (3.11 is a good modern default)
+target-version = "py311"
+select = ["E", "F", "B", "I", "UP"]
+ignore = ["E203", "E266", "E501"]
+exclude = ["__pycache__", ".git", ".venv", "build", "dist"]
+
+[tool.ruff.isort]
+combine-as-imports = true
+
+# Flake8 >=7 supports pyproject
+[tool.flake8]
+max-line-length = 79
+select = "E,F,W,C,B,B950"
+ignore = "E203,E266,E501"
+exclude = "__pycache__,.git,.venv,build,dist"
+max-complexity = 12
