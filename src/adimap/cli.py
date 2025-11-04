@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from typing import Optional, Tuple
 
 from .adif import parse_adif
 from .maidenhead import maidenhead_to_latlon
@@ -94,12 +93,12 @@ def _build_args() -> argparse.Namespace:
 def main() -> None:
     args = _build_args()
 
-    with open(args.adi, "r", encoding="utf-8", errors="ignore") as f:
+    with open(args.adi, encoding="utf-8", errors="ignore") as f:
         content = f.read()
 
     records = parse_adif(content)
 
-    home_latlon: Optional[Tuple[float, float]] = None
+    home_latlon: tuple[float, float] | None = None
     if args.home_grid:
         home_latlon = maidenhead_to_latlon(args.home_grid)
         if not home_latlon:

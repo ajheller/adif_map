@@ -1,10 +1,13 @@
+# pylint: disable=missing-module-docstring, missing-function-docstring
+
+
 from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Iterable
 from datetime import datetime
 from textwrap import dedent
-from typing import Dict, Iterable, List, Optional, Tuple
 
 import folium
 from folium.plugins import HeatMap, MarkerCluster, TimestampedGeoJson
@@ -14,7 +17,7 @@ from .maidenhead import maidenhead_to_latlon
 # -------------------------- Parsing helpers ---------------------------
 
 
-def _parse_coord(text: str, is_lat: bool) -> Optional[float]:
+def _parse_coord(text: str, is_lat: bool) -> float | None:
     if text is None:
         return None
 
@@ -46,7 +49,7 @@ def _parse_coord(text: str, is_lat: bool) -> Optional[float]:
     return val
 
 
-def parse_latlon(lat_str: str, lon_str: str) -> Optional[Tuple[float, float]]:
+def parse_latlon(lat_str: str, lon_str: str) -> tuple[float, float] | None:
     lat = _parse_coord(lat_str, True)
     lon = _parse_coord(lon_str, False)
     if lat is None or lon is None:
@@ -54,7 +57,7 @@ def parse_latlon(lat_str: str, lon_str: str) -> Optional[Tuple[float, float]]:
     return (lat, lon)
 
 
-def best_latlon(entry: Dict[str, str]) -> Optional[Tuple[float, float, str]]:
+def best_latlon(entry: dict[str, str]) -> tuple[float, float, str] | None:
     lat = entry.get("LAT")
     lon = entry.get("LON")
     if lat and lon:
@@ -74,7 +77,7 @@ def best_latlon(entry: Dict[str, str]) -> Optional[Tuple[float, float, str]]:
 # -------------------------- UI + formatting ---------------------------
 
 
-def format_popup(entry: Dict[str, str]) -> str:
+def format_popup(entry: dict[str, str]) -> str:
     call = entry.get("CALL", "QSO")
     # external lookups
     qrz = f"https://www.qrz.com/lookup/{call}"
@@ -125,16 +128,14 @@ def _title_element(title: str) -> folium.Element:
     return folium.Element(html)
 
 
-def _legend_element(items: List[Tuple[str, str]], title: str) -> folium.Element:
+def _legend_element(items: list[tuple[str, str]], title: str) -> folium.Element:
     rows = []
     for label, color in sorted(items):
         rows.append(
-            (
-                '<div style="display:flex;align-items:center;margin:2px 0;">'
-                f'<span style="display:inline-block;width:12px;height:12px;'
-                f'border-radius:50%;background:{color};margin-right:6px;"></span>'
-                f"{label}</div>"
-            )
+            '<div style="display:flex;align-items:center;margin:2px 0;">'
+            f'<span style="display:inline-block;width:12px;height:12px;'
+            f'border-radius:50%;background:{color};margin-right:6px;"></span>'
+            f"{label}</div>"
         )
 
     html = dedent(
@@ -144,19 +145,19 @@ def _legend_element(items: List[Tuple[str, str]], title: str) -> folium.Element:
                     box-shadow: 0 1px 6px rgba(0,0,0,0.15);
                     font-family: sans-serif; font-size: 13px;">
           <b>{title}</b>
-          <div style="margin-top:4px;">{''.join(rows)}</div>
+          <div style="margin-top:4px;">{"".join(rows)}</div>
         </div>
         """
     ).strip()
     return folium.Element(html)
 
 
-def _stats_panel(entries: List[Dict[str, str]]) -> folium.Element:
+def _stats_panel(entries: list[dict[str, str]]) -> folium.Element:
     total = len(entries)
     calls = {e.get("CALL", "") for e in entries if e.get("CALL")}
-    dates: List[datetime] = []
+    dates: list[datetime] = []
 
-    def _parse_dt(e: Dict[str, str]) -> Optional[datetime]:
+    def _parse_dt(e: dict[str, str]) -> datetime | None:
         d = (e.get("QSO_DATE") or "").strip()
         t = (e.get("TIME_ON") or "").strip()
         if len(d) == 8:
@@ -178,15 +179,15 @@ def _stats_panel(entries: List[Dict[str, str]]) -> folium.Element:
     drange = f"{min(dates).date()} → {max(dates).date()}" if dates else "n/a"
 
     # counts by band / mode
-    by_band: Dict[str, int] = {}
-    by_mode: Dict[str, int] = {}
+    by_band: dict[str, int] = {}
+    by_mode: dict[str, int] = {}
     for e in entries:
         b = (e.get("BAND") or "").strip().upper() or "OTHER"
         m = (e.get("MODE") or "").strip().upper() or "OTHER"
         by_band[b] = by_band.get(b, 0) + 1
         by_mode[m] = by_mode.get(m, 0) + 1
 
-    def _tab(d: Dict[str, int]) -> str:
+    def _tab(d: dict[str, int]) -> str:
         return "".join(
             f"<div style='display:flex;justify-content:space-between'><span>{k}</span><span>{v}</span></div>"
             for k, v in sorted(d.items())
@@ -251,19 +252,19 @@ DEFAULT_COLOR = "gray"
 
 
 def build_map(
-    records: List[Dict[str, str]],
+    records: list[dict[str, str]],
     out_path: str,
     title: str = "ADIF QSO Map",
     connect: bool = False,
-    home_latlon: Optional[Tuple[float, float]] = None,
+    home_latlon: tuple[float, float] | None = None,
     layers_by_band: bool = False,
     layers_by_mode: bool = False,
     heatmap: bool = False,
     heatmap_by_band: bool = False,
     heatmap_by_mode: bool = False,
     cluster: bool = True,
-    export_csv: Optional[str] = None,
-    export_geojson: Optional[str] = None,
+    export_csv: str | None = None,
+    export_geojson: str | None = None,
     time_slider: bool = False,
 ) -> None:
     """Create the Folium map with optional layers, heatmaps, exports & time.
@@ -276,7 +277,7 @@ def build_map(
     * Use ``cluster=False`` to disable clustering on base-layer maps or inside
       band/mode layers.
     """
-    points: List[Tuple[float, float, Dict[str, str]]] = []
+    points: list[tuple[float, float, dict[str, str]]] = []
     skipped = 0
 
     for rec in records:
@@ -340,7 +341,9 @@ def build_map(
     ).add_to(fmap)
 
     folium.TileLayer(
-        tiles="OpenStreetMap", name="OpenStreetMap", attr="© OpenStreetMap contributors"
+        tiles="OpenStreetMap",
+        name="OpenStreetMap",
+        attr="© OpenStreetMap contributors",
     ).add_to(fmap)
 
     fmap.get_root().html.add_child(_title_element(title))
@@ -349,8 +352,8 @@ def build_map(
     use_band_layers = bool(layers_by_band)
     use_mode_layers = bool(layers_by_mode and not layers_by_band)
 
-    band_groups: Dict[str, folium.FeatureGroup] = {}
-    mode_groups: Dict[str, folium.FeatureGroup] = {}
+    band_groups: dict[str, folium.FeatureGroup] = {}
+    mode_groups: dict[str, folium.FeatureGroup] = {}
 
     if use_band_layers:
         for _, _, rec in points:
@@ -369,8 +372,8 @@ def build_map(
                 mode_groups[mode] = grp
 
     # Base cluster if no layers
-    base_cluster: Optional[MarkerCluster] = None
-    base_group: Optional[folium.FeatureGroup] = None
+    base_cluster: MarkerCluster | None = None
+    base_group: folium.FeatureGroup | None = None
     if not use_band_layers and not use_mode_layers:
         if cluster:
             base_cluster = MarkerCluster(name="QSOs")
@@ -379,13 +382,13 @@ def build_map(
             base_group = folium.FeatureGroup(name="QSOs")
             base_group.add_to(fmap)
 
-    by_band_colors: List[Tuple[str, str]] = []
-    by_mode_colors: List[Tuple[str, str]] = []
+    by_band_colors: list[tuple[str, str]] = []
+    by_mode_colors: list[tuple[str, str]] = []
 
     # Collect heatmap points
-    heat_data_all: List[Tuple[float, float]] = []
-    heat_by_band: Dict[str, List[Tuple[float, float]]] = {}
-    heat_by_mode: Dict[str, List[Tuple[float, float]]] = {}
+    heat_data_all: list[tuple[float, float]] = []
+    heat_by_band: dict[str, list[tuple[float, float]]] = {}
+    heat_by_mode: dict[str, list[tuple[float, float]]] = {}
 
     # Plot points
     for lat, lon, rec in points:
@@ -583,7 +586,7 @@ def build_map(
 # ------------------------------- Exports ------------------------------
 
 
-def _export_csv(path: str, entries: Iterable[Dict[str, str]]) -> None:
+def _export_csv(path: str, entries: Iterable[dict[str, str]]) -> None:
     keys = set()
     rows = []
     for e in entries:
@@ -598,7 +601,7 @@ def _export_csv(path: str, entries: Iterable[Dict[str, str]]) -> None:
 
 
 def _export_geojson(
-    path: str, points: Iterable[Tuple[float, float, Dict[str, str]]]
+    path: str, points: Iterable[tuple[float, float, dict[str, str]]]
 ) -> None:
     feats = []
     for lat, lon, rec in points:

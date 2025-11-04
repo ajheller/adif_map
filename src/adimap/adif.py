@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, List
 
 _EOR_RE = re.compile(r"<eor>", re.IGNORECASE)
 
 
-def parse_adif(content: str) -> List[Dict[str, str]]:
+def parse_adif(content: str) -> list[dict[str, str]]:
     """Parse ADIF content into a list of dicts (field names uppercased)."""
-    records: List[Dict[str, str]] = []
+    records: list[dict[str, str]] = []
 
     header_end = re.search(r"<eoh>", content, flags=re.IGNORECASE)
     data = content[header_end.end() :] if header_end else content
@@ -21,7 +20,7 @@ def parse_adif(content: str) -> List[Dict[str, str]]:
         if not raw:
             continue
 
-        entry: Dict[str, str] = {}
+        entry: dict[str, str] = {}
         for match in field_pat.finditer(raw):
             name = match.group(1).upper()
             length = int(match.group(2))

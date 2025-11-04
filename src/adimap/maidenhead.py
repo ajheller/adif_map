@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional, Tuple
 
-
-def maidenhead_to_latlon(grid: str) -> Optional[Tuple[float, float]]:
+def maidenhead_to_latlon(grid: str) -> tuple[float, float] | None:
     """Convert Maidenhead grid (e.g. FN20, JN58TD) → (lat, lon) cell center.
 
     Supports 2-8 chars. Returns ``None`` on invalid input.

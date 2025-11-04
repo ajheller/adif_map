@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
-
 # Minimal, pragmatic prefix → country map.
 # For serious DXCC accuracy, replace or extend with a robust dataset.
-PREFIX_COUNTRY: Dict[str, str] = {
+PREFIX_COUNTRY: dict[str, str] = {
     # North America
     "K": "United States",
     "N": "United States",
@@ -83,7 +81,7 @@ PREFIX_COUNTRY: Dict[str, str] = {
 }
 
 
-def lookup_country(callsign: Optional[str]) -> Optional[str]:
+def lookup_country(callsign: str | None) -> str | None:
     """Best-effort callsign → country lookup using prefix heuristics.
 
     Strategy: match the longest prefix from PREFIX_COUNTRY.
